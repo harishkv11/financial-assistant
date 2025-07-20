@@ -3,6 +3,7 @@ package com.harishverma.financial.assistant.controller;
 import com.harishverma.financial.assistant.entity.UploadedFile;
 import com.harishverma.financial.assistant.repository.UploadedFileRepository;
 import com.harishverma.financial.assistant.security.JwtUtil;
+import com.harishverma.financial.assistant.service.UploadFileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +18,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/upload")
 @RequiredArgsConstructor
 public class FileUploadController {
-
-    private final UploadedFileRepository fileRepo;
+    private final UploadFileService uploadFileService;
     private final JwtUtil jwtUtil;
 
     @PostMapping
@@ -26,33 +26,14 @@ public class FileUploadController {
             @RequestParam("file") MultipartFile file,
             @RequestHeader("Authorization") String authHeader) throws IOException {
 
-        String token = authHeader.replace("Bearer ", "");
-        String username = jwtUtil.extractUsername(token);
-
-        UploadedFile upload = UploadedFile.builder()
-                .userId(username)
-                .fileName(file.getOriginalFilename())
-                .contentType(file.getContentType())
-                .data(file.getBytes())
-                .uploadedAt(new Date())
-                .build();
-
-        fileRepo.save(upload);
+        uploadFileService.uploadFile(authHeader, file);
         return ResponseEntity.ok("✅ File uploaded successfully.");
     }
 
     @GetMapping
     public ResponseEntity<List<String>> getUploadedFiles(
             @RequestHeader("Authorization") String authHeader) {
-
-        String token = authHeader.replace("Bearer ", "");
-        String username = jwtUtil.extractUsername(token);
-
-        List<UploadedFile> files = fileRepo.findByUserId(username);
-        List<String> filenames = files.stream()
-                .map(UploadedFile::getFileName)
-                .collect(Collectors.toList());
-
+        List<String> filenames = uploadFileService.getUploadFiles(authHeader);
         return ResponseEntity.ok(filenames);
     }
 }

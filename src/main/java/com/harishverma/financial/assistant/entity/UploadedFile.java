@@ -24,5 +24,6 @@ public class UploadedFile {
     String fileName;
     String contentType;
     byte[] data;
-    private Date uploadedAt;
+    Date uploadedAt;
+    String extractedText;
 }
