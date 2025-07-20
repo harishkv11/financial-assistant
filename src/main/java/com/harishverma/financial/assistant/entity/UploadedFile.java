@@ -26,4 +26,5 @@ public class UploadedFile {
     byte[] data;
     Date uploadedAt;
     String extractedText;
+    String summarizedText;
 }
